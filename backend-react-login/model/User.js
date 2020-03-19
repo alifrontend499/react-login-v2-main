@@ -2,9 +2,14 @@ const mongoose = require('mongoose')
 const collectionName = 'Users';
 
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
         required: true,
+        min: 3,
+        max: 50
+    },
+    lastName: {
+        type: String,
         min: 3,
         max: 50
     },

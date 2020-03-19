@@ -2,17 +2,17 @@ import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
-import axios from 'axios'
+import { login, saveUser, checkUser } from '../services/user.service'
 
 export default function Login() {
-    const [email, setEmail] = useState("a@g.com")
-    const [password, setPassword] = useState("aa")
+    const [email, setEmail] = useState("ali2@gmail.com")
+    const [password, setPassword] = useState("123456")
     const [loading, setLoading] = useState(false)
-    const [formerror, setFormError] = useState('')
-    const [errorType, setErrorType] = useState('')
+    const [formMsg, setFormMsg] = useState('')
+    const [msgType, setMsgType] = useState('')
     const buttonRef = useRef(null)
 
-    const handleUsernameChange = (ev) => {
+    const handleEmailChange = (ev) => {
         setEmail(ev.target.value)
     }
     const handlePasswordChange = (ev) => {
@@ -20,6 +20,7 @@ export default function Login() {
     }
     const handleFormSubmit = (ev) => {
         ev.preventDefault()
+        console.log(checkUser());
         // disabling the login button
         buttonRef.current.classList.add('button-disabled')
 
@@ -27,39 +28,45 @@ export default function Login() {
         setLoading(true)
 
         // checking user login details
-        axios.post('http://localhost:1000/api/user/login', {
-            email: email,
-            password: password
-        }).then((res) => {            
+        login(email, password).then((res) => {
             console.log(res.data)
 
             // disabling loading
             setLoading(false)
 
-            // enabling the login button
-            buttonRef.current.classList.remove('button-disabled')
+            if(res.data) {
+                const user = res.data
+                // setting Success message
+                setMsgType("success")
+                setFormMsg("Login successfull")
+                setTimeout(() => {
+                    // empty the values
+                    setMsgType("")
+                    setFormMsg("")
+                    // enabling the login button
+                    buttonRef.current.classList.remove('button-disabled')
+                    // saving the user to localStorage
+                    saveUser(user)
+                }, 1000);
+            }
+
         }).catch(err => {
-            const errorResponse = err.response.data
-            
-            
-            if(errorResponse) {
+            if (err.response) {
+                const errorResponse = err.response.data
+                // console.log(errorResponse)
                 // setting Error Type
-                setErrorType(errorResponse.errorType)
+                setMsgType(`error ${errorResponse.msgType}`)
                 // setting Form Error
-                setFormError(errorResponse.errorMessage)
+                setFormMsg(errorResponse.errorMessage)
 
                 setTimeout(() => {
                     // empty the values
-                    setErrorType("")
-                    setFormError("")
-                }, 3000);
+                    setMsgType("")
+                    setFormMsg("")
+                    // enabling the login button
+                    buttonRef.current.classList.remove('button-disabled')
+                }, 5000);
             }
-
-            console.log(errorResponse)
-
-            // enabling the login button
-            buttonRef.current.classList.remove('button-disabled')
-
             // disabling loading
             setLoading(false)
         })
@@ -70,15 +77,15 @@ export default function Login() {
             <h2 className="auth-heading">Login</h2>
             <div className="form">
                 {
-                    (formerror && formerror.length) ?
-                        <div className={`forms-errors ${(errorType && errorType.length ? errorType: '')}`}>
-                            <p>{formerror}</p>
+                    (formMsg && formMsg.length) ?
+                        <div className={`forms-message ${(msgType && msgType.length ? msgType : '')}`}>
+                            <p>{formMsg}</p>
                         </div> : null
                 }
                 <form action="" onSubmit={handleFormSubmit}>
                     <div className="form-group">
                         <label>Enter Email</label>
-                        <input type="email" className="form-control" placeholder="Email" value={email} onChange={handleUsernameChange} required />
+                        <input type="email" className="form-control" placeholder="Email" value={email} onChange={handleEmailChange} required />
                     </div>
                     <div className="form-group">
                         <label>Enter Password</label>

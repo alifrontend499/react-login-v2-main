@@ -105,7 +105,8 @@ code {
   font-size: 12px;
 }
 
-.forms-errors>p {  
+.forms-message.error>p,
+.forms-message.success>p {  
   background: #ff8a8a;
   border-radius: 4px;
   padding: 3px 10px 4px;
@@ -114,4 +115,10 @@ code {
   display: inline-block;
   margin: 0 0 10px;
   font-weight: 700;
+}
+.forms-message.error>p {
+  background: #ff8a8a;
+}
+.forms-message.success>p {  
+  background: #8affb9;
 }

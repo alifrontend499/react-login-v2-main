@@ -20,7 +20,7 @@ export default function Routes() {
             <Route path="/login" component={Login}></Route>
             <Route path="/register" component={Register}></Route>
             <PrivateRoute path="/my-account" component={MyAccount}></PrivateRoute>
-            <Route component={MyAccount}></Route>
+            {/* <Route component={MyAccount}></Route> */}
         </Switch>
     )
 }
