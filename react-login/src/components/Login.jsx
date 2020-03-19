@@ -8,7 +8,8 @@ export default function Login() {
     const [email, setEmail] = useState("a@g.com")
     const [password, setPassword] = useState("aa")
     const [loading, setLoading] = useState(false)
-    const [validationError, setvalidationError] = useState('')
+    const [formerror, setFormError] = useState('')
+    const [errorType, setErrorType] = useState('')
     const buttonRef = useRef(null)
 
     const handleUsernameChange = (ev) => {
@@ -25,32 +26,36 @@ export default function Login() {
         // enabling loading
         setLoading(true)
 
-        // empty validations errors
-        // setvalidationError("")
-
         // checking user login details
         axios.post('http://localhost:1000/api/user/login', {
             email: email,
             password: password
         }).then((res) => {            
-            console.log(res)
+            console.log(res.data)
 
             // disabling loading
             setLoading(false)
 
-            // setting validations error
-            if (res.data.validationError) {
-                const validationError = res.data.validationError
-                setvalidationError(validationError)
-                setTimeout(() => {
-                    setvalidationError("")
-                    // enabling the login button
-                    buttonRef.current.classList.remove('button-disabled')
-                }, 3000);
-                return
-            }
+            // enabling the login button
+            buttonRef.current.classList.remove('button-disabled')
         }).catch(err => {
-            console.log(err)
+            const errorResponse = err.response.data
+            
+            
+            if(errorResponse) {
+                // setting Error Type
+                setErrorType(errorResponse.errorType)
+                // setting Form Error
+                setFormError(errorResponse.errorMessage)
+
+                setTimeout(() => {
+                    // empty the values
+                    setErrorType("")
+                    setFormError("")
+                }, 3000);
+            }
+
+            console.log(errorResponse)
 
             // enabling the login button
             buttonRef.current.classList.remove('button-disabled')
@@ -65,9 +70,9 @@ export default function Login() {
             <h2 className="auth-heading">Login</h2>
             <div className="form">
                 {
-                    (validationError && validationError.length) ?
-                        <div className="forms-errors">
-                            <p>{validationError}</p>
+                    (formerror && formerror.length) ?
+                        <div className={`forms-errors ${(errorType && errorType.length ? errorType: '')}`}>
+                            <p>{formerror}</p>
                         </div> : null
                 }
                 <form action="" onSubmit={handleFormSubmit}>
