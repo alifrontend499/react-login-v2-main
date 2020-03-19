@@ -50,15 +50,15 @@ router.post('/login', async (req, res) => {
     const { error } = loginValidation(req.body);
 
     // check if theres any validation error
-    if (typeof error !== 'undefined') return res.send(error.details[0].message)
+    if (typeof error !== 'undefined') return res.send({validationError: error.details[0].message})
 
     // checking if a user exists in the database
     const user = await User.findOne({ email: req.body.email })
-    if (!user) return res.status(400).send("The email you entered is worng")
+    if (!user) return res.status(404).send("The email you entered is worng")
 
     // checking if password is correct
     const validPass = await bcrypt.compare(req.body.password, user.password)
-    if (!validPass) return res.status(400).send("The pasword you entered is worng")
+    if (!validPass) return res.status(404).send("The pasword you entered is worng")
 
     // creating a jsonwebtoken
     const token = jwt.sign({ id: user._id }, process.env.TOKEN_SECRET)
